@@ -1,6 +1,6 @@
 {
   "name": "ngxs-logrocket-plugin",
-  "version": "0.0.0",
+  "version": "21.0.0",
   "repository": {
     "type": "git",
     "url": "git+https://github.com/arturovt/ngxs-logrocket-plugin.git"
