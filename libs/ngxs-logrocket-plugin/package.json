@@ -26,6 +26,7 @@
   ],
   "sideEffects": false,
   "peerDependencies": {
+    "@angular/core": ">=21.0.0",
     "@ngxs/store": ">=21.0.0"
   },
   "dependencies": {

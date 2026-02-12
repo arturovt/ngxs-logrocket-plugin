@@ -93,73 +93,6 @@ export const appConfig: ApplicationConfig = {
 };
 ```
 
-## Configuration
-
-### Sanitizing Actions
-
-Remove sensitive data from actions before logging:
-
-```typescript
-import type LogRocket from 'logrocket';
-
-withNgxsLogRocketReduxMiddlewarePlugin({
-  logrocket: () => {
-    const logRocket = LogRocket;
-
-    // Configure sanitization
-    logRocket.reduxMiddleware({
-      actionSanitizer: (action) => {
-        // Ignore specific actions
-        if (action.type === '[Auth] Login Success') {
-          return null; // Action won't be logged
-        }
-
-        // Redact sensitive data
-        if (action.type === '[User] Update Profile') {
-          return {
-            ...action,
-            password: undefined,
-            creditCard: undefined,
-          };
-        }
-
-        return action;
-      },
-    });
-
-    return logRocket;
-  },
-});
-```
-
-### Sanitizing State
-
-Remove sensitive data from state snapshots:
-
-```typescript
-withNgxsLogRocketReduxMiddlewarePlugin({
-  logrocket: () => {
-    const logRocket = LogRocket;
-
-    logRocket.reduxMiddleware({
-      stateSanitizer: (state) => {
-        return {
-          ...state,
-          auth: {
-            ...state.auth,
-            token: undefined, // Remove auth token
-            password: undefined,
-          },
-          payment: undefined, // Remove entire payment state
-        };
-      },
-    });
-
-    return logRocket;
-  },
-});
-```
-
 ## Action Status Types
 
 The plugin logs actions with the following statuses:
@@ -235,3 +168,11 @@ import type { NgxsLogRocketReduxMiddlewareOptions } from 'ngxs-logrocket-plugin'
 - [logrocket](https://www.npmjs.com/package/logrocket) - LogRocket JavaScript SDK
 - [@ngxs/store](https://www.npmjs.com/package/@ngxs/store) - NGXS State Management
 - [logrocket-ngrx](https://www.npmjs.com/package/logrocket-ngrx) - NgRx middleware for LogRocket
+
+## Version Compatibility
+
+This package follows the major version of `@ngxs/store`:
+
+| ngxs-logrocket-plugin | @ngxs/store |
+| --------------------- | ----------- |
+| 21.x.x                | >=21.0.0    |
