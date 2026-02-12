@@ -1,0 +1,34 @@
+{
+  "name": "ngxs-logrocket-plugin",
+  "version": "0.0.0",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/arturovt/ngxs-logrocket-plugin.git"
+  },
+  "license": "MIT",
+  "homepage": "https://github.com/arturovt/ngxs-logrocket-plugin#readme",
+  "bugs": {
+    "url": "git+https://github.com/arturovt/ngxs-logrocket-plugin/issues"
+  },
+  "keywords": [
+    "angular",
+    "ngxs",
+    "logrocket",
+    "plugin",
+    "middleware",
+    "state-management",
+    "session-replay",
+    "error-tracking",
+    "debugging",
+    "monitoring",
+    "redux",
+    "analytics"
+  ],
+  "sideEffects": false,
+  "peerDependencies": {
+    "@ngxs/store": ">=21.0.0"
+  },
+  "dependencies": {
+    "@scarf/scarf": "^1.4.0"
+  }
+}
