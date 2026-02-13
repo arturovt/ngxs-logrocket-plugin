@@ -3,9 +3,9 @@ import type LogRocket from 'logrocket';
 
 export interface NgxsLogRocketReduxMiddlewareOptions {
   /**
-   * Factory function that returns the LogRocket object.
+   * Factory function that returns the LogRocket instance.
    *
-   * This allows flexibility in how LogRocket is loaded:
+   * Runs in injection context, allowing use of Angular's `inject()` function.
    *
    * @example
    * // Option 1: Import from npm package
@@ -16,6 +16,15 @@ export interface NgxsLogRocketReduxMiddlewareOptions {
    * @example
    * // Option 2: Load from window (script tag)
    * logrocket: () => window.LogRocket
+   *
+   * @example
+   * // Option 3: Use Angular injection
+   * import { inject, DOCUMENT } from '@angular/core';
+   *
+   * logrocket: () => {
+   *   const document = inject(DOCUMENT);
+   *   return document.defaultView?.LogRocket;
+   * }
    */
   logrocket: () => typeof LogRocket;
 }
