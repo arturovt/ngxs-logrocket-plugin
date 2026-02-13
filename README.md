@@ -5,14 +5,16 @@ NGXS plugin for [LogRocket](https://logrocket.com/) that augments LogRocket sess
 [![npm version](https://badge.fury.io/js/ngxs-logrocket-plugin.svg)](https://www.npmjs.com/package/ngxs-logrocket-plugin)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 
+![LogRocket Redux Tab](https://raw.githubusercontent.com/arturovt/ngxs-logrocket-plugin/refs/heads/main/docs/assets/screenshot.png)
+
 ## Features
 
-- 🔍 **Complete Action Logging** - Captures all NGXS actions with their status (Dispatched, Successful, Errored, Canceled)
-- 📸 **State Snapshots** - Records state before and after each action
-- ⚡ **Optimized Performance** - Runs outside Angular zone to prevent unnecessary change detection
-- 🛡️ **Privacy Controls** - Sanitize sensitive data from actions and state
-- 🔧 **Flexible Integration** - Load LogRocket from npm package or CDN script tag
-- 🌐 **SSR Compatible** - Safely skips logging during server-side rendering
+- **Complete Action Logging** - Captures all NGXS actions with their status (Dispatched, Successful, Errored, Canceled)
+- **State Snapshots** - Records state before and after each action
+- **Optimized Performance** - Runs outside Angular zone to prevent unnecessary change detection
+- **Privacy Controls** - Sanitize sensitive data from actions and state
+- **Flexible Integration** - Load LogRocket from npm package or CDN script tag
+- **SSR Compatible** - Safely skips logging during server-side rendering
 
 ## Installation
 
