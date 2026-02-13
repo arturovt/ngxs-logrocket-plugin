@@ -93,6 +93,21 @@ export const appConfig: ApplicationConfig = {
 };
 ```
 
+### Advanced: Using Angular Injection
+
+The factory runs in injection context, allowing you to use Angular's `inject()`:
+
+```typescript
+import { inject, DOCUMENT } from '@angular/core';
+
+withNgxsLogRocketReduxMiddlewarePlugin({
+  logrocket: () => {
+    const document = inject(DOCUMENT);
+    return document.defaultView?.LogRocket!;
+  },
+});
+```
+
 ## Action Status Types
 
 The plugin logs actions with the following statuses:

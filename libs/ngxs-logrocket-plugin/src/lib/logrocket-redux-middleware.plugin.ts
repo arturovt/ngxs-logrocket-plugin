@@ -1,4 +1,13 @@
-import { inject, Injectable, Injector, NgZone } from '@angular/core';
+import {
+  inject,
+  Injectable,
+  InjectionToken,
+  Injector,
+  NgZone,
+  PLATFORM_ID,
+  runInInjectionContext,
+} from '@angular/core';
+import { isPlatformServer } from '@angular/common';
 import {
   ActionStatus,
   getActionTypeFromInstance,
@@ -10,11 +19,21 @@ import { tap } from 'rxjs';
 
 import { ɵNGXS_LOGROCKET_REDUX_MIDDLEWARE_OPTIONS } from './symbols';
 
+const IS_SERVER = new InjectionToken('', {
+  factory: () => {
+    return (
+      (typeof ngServerMode !== 'undefined' && ngServerMode) ||
+      isPlatformServer(inject(PLATFORM_ID))
+    );
+  },
+});
+
 @Injectable()
 export class ɵNgxsLogRocketReduxMiddlewarePlugin implements NgxsPlugin {
   private readonly _ngZone = inject(NgZone);
   private readonly _injector = inject(Injector);
   private readonly _options = inject(ɵNGXS_LOGROCKET_REDUX_MIDDLEWARE_OPTIONS);
+  private readonly _isServer = inject(IS_SERVER);
 
   private _store!: Store;
   private _logRocketStore!: (newState: any) => (newAction: any) => void;
@@ -54,11 +73,18 @@ export class ɵNgxsLogRocketReduxMiddlewarePlugin implements NgxsPlugin {
     action: any,
     status: ActionStatus,
   ): void {
+    // LogRocket only runs in the browser, skip logging during SSR.
+    if (this._isServer) {
+      return;
+    }
+
     // Retrieve lazily to avoid any cyclic dependency injection errors.
     this._store ??= this._injector.get(Store);
 
     this._logRocketStore ??= this._ngZone.runOutsideAngular(() => {
-      return this._options.logrocket().reduxMiddleware()({
+      return runInInjectionContext(this._injector, () =>
+        this._options.logrocket(),
+      ).reduxMiddleware()({
         getState: () => this._store.snapshot(),
       });
     });
