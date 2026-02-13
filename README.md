@@ -12,6 +12,7 @@ NGXS plugin for [LogRocket](https://logrocket.com/) that augments LogRocket sess
 - ⚡ **Optimized Performance** - Runs outside Angular zone to prevent unnecessary change detection
 - 🛡️ **Privacy Controls** - Sanitize sensitive data from actions and state
 - 🔧 **Flexible Integration** - Load LogRocket from npm package or CDN script tag
+- 🌐 **SSR Compatible** - Safely skips logging during server-side rendering
 
 ## Installation
 
@@ -93,17 +94,73 @@ export const appConfig: ApplicationConfig = {
 };
 ```
 
-### Advanced: Using Angular Injection
+## Configuration
 
-The factory runs in injection context, allowing you to use Angular's `inject()`:
+### Sanitizing Actions
+
+Remove sensitive data from actions before logging:
 
 ```typescript
-import { inject, DOCUMENT } from '@angular/core';
+withNgxsLogRocketReduxMiddlewarePlugin({
+  logrocket: () => LogRocket,
+  actionSanitizer: (action) => {
+    // Ignore specific actions
+    if (action.type === '[Auth] Login Success') {
+      return null; // Action won't be logged
+    }
+
+    // Redact sensitive data
+    if (action.type === '[User] Update Profile') {
+      return {
+        ...action,
+        password: undefined,
+        creditCard: undefined,
+      };
+    }
+
+    return action;
+  },
+});
+```
+
+### Sanitizing State
+
+Remove sensitive data from state snapshots:
+
+```typescript
+withNgxsLogRocketReduxMiddlewarePlugin({
+  logrocket: () => LogRocket,
+  stateSanitizer: (state) => {
+    return {
+      ...state,
+      auth: {
+        ...state.auth,
+        token: undefined, // Remove auth token
+        password: undefined,
+      },
+      payment: undefined, // Remove entire payment state
+    };
+  },
+});
+```
+
+### Using Angular Injection in Sanitizers
+
+Both `logrocket`, `stateSanitizer`, and `actionSanitizer` run in injection context, allowing you to use Angular's `inject()`:
+
+```typescript
+import { inject } from '@angular/core';
+import { MySecurityService } from './my-security.service';
 
 withNgxsLogRocketReduxMiddlewarePlugin({
-  logrocket: () => {
-    const document = inject(DOCUMENT);
-    return document.defaultView?.LogRocket!;
+  logrocket: () => LogRocket,
+  stateSanitizer: (state) => {
+    const security = inject(MySecurityService);
+    return security.sanitizeState(state);
+  },
+  actionSanitizer: (action) => {
+    const security = inject(MySecurityService);
+    return security.shouldLogAction(action) ? action : null;
   },
 });
 ```
@@ -155,6 +212,7 @@ Once configured, you can view NGXS actions in the LogRocket dashboard:
 - **Data Compression**: Actions and state are compressed using binary format
 - **State Diffing**: Only state changes are transmitted, not full snapshots
 - **Error Handling**: LogRocket errors are caught and logged without breaking your app
+- **SSR Safe**: Automatically skips logging on server to prevent errors
 
 ## TypeScript Support
 
@@ -177,6 +235,10 @@ import type { NgxsLogRocketReduxMiddlewareOptions } from 'ngxs-logrocket-plugin'
 - Use `actionSanitizer` to filter high-frequency actions
 - Sanitize large state objects to reduce payload size
 - Verify you're using the factory pattern `() => LogRocket` (not direct reference)
+
+## License
+
+MIT © [arturovt](https://github.com/arturovt)
 
 ## Related Projects
 

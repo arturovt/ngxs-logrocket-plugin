@@ -1,9 +1,18 @@
 import { InjectionToken } from '@angular/core';
 import type LogRocket from 'logrocket';
 
-export interface NgxsLogRocketReduxMiddlewareOptions {
+/**
+ * Extract options from LogRocket's `reduxMiddleware` function.
+ * Since LogRocket doesn't export these types, we extract them from the function signature.
+ */
+export type ReduxMiddlewareOptions = NonNullable<
+  Parameters<(typeof LogRocket)['reduxMiddleware']>[0]
+>;
+
+export interface NgxsLogRocketReduxMiddlewareOptions
+  extends ReduxMiddlewareOptions {
   /**
-   * Factory function that returns the LogRocket instance.
+   * Factory function that returns the LogRocket object.
    *
    * Runs in injection context, allowing use of Angular's `inject()` function.
    *

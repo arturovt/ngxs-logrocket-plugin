@@ -1,7 +1,6 @@
 import {
   inject,
   Injectable,
-  InjectionToken,
   Injector,
   NgZone,
   PLATFORM_ID,
@@ -17,23 +16,19 @@ import {
 } from '@ngxs/store';
 import { tap } from 'rxjs';
 
-import { ɵNGXS_LOGROCKET_REDUX_MIDDLEWARE_OPTIONS } from './symbols';
-
-const IS_SERVER = new InjectionToken('', {
-  factory: () => {
-    return (
-      (typeof ngServerMode !== 'undefined' && ngServerMode) ||
-      isPlatformServer(inject(PLATFORM_ID))
-    );
-  },
-});
+import {
+  type ReduxMiddlewareOptions,
+  ɵNGXS_LOGROCKET_REDUX_MIDDLEWARE_OPTIONS,
+} from './symbols';
 
 @Injectable()
 export class ɵNgxsLogRocketReduxMiddlewarePlugin implements NgxsPlugin {
   private readonly _ngZone = inject(NgZone);
   private readonly _injector = inject(Injector);
   private readonly _options = inject(ɵNGXS_LOGROCKET_REDUX_MIDDLEWARE_OPTIONS);
-  private readonly _isServer = inject(IS_SERVER);
+  private readonly _isServer =
+    (typeof ngServerMode !== 'undefined' && ngServerMode) ||
+    isPlatformServer(inject(PLATFORM_ID));
 
   private _store!: Store;
   private _logRocketStore!: (newState: any) => (newAction: any) => void;
@@ -78,16 +73,34 @@ export class ɵNgxsLogRocketReduxMiddlewarePlugin implements NgxsPlugin {
       return;
     }
 
-    // Retrieve lazily to avoid any cyclic dependency injection errors.
-    this._store ??= this._injector.get(Store);
+    if (this._logRocketStore == null) {
+      // Retrieve lazily to avoid any cyclic dependency injection errors.
+      this._store = this._injector.get(Store);
 
-    this._logRocketStore ??= this._ngZone.runOutsideAngular(() => {
-      return runInInjectionContext(this._injector, () =>
-        this._options.logrocket(),
-      ).reduxMiddleware()({
-        getState: () => this._store.snapshot(),
+      // Wrap sanitizers in injection context to allow users to use `inject()` within them.
+      const { stateSanitizer, actionSanitizer } = this._options;
+      const options: ReduxMiddlewareOptions = {
+        stateSanitizer: stateSanitizer
+          ? (state) =>
+              runInInjectionContext(this._injector, () => stateSanitizer(state))
+          : undefined,
+        actionSanitizer: actionSanitizer
+          ? (action) =>
+              runInInjectionContext(this._injector, () =>
+                actionSanitizer(action),
+              )
+          : undefined,
+      };
+
+      this._logRocketStore = this._ngZone.runOutsideAngular(() => {
+        // Run logrocket factory in injection context to support `inject()` usage.
+        return runInInjectionContext(this._injector, () =>
+          this._options.logrocket(),
+        ).reduxMiddleware(options)({
+          getState: () => this._store.snapshot(),
+        });
       });
-    });
+    }
 
     newState = newState || this._store.snapshot();
     const newAction = {
