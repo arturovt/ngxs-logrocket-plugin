@@ -96,6 +96,56 @@ export const appConfig: ApplicationConfig = {
 };
 ```
 
+### Lazy-loading Plugin
+
+You can also lazy-load the plugin when LogRocket is needed in your application, for example when a user logs in and `LogRocket.init` is called:
+
+```ts
+// somewhere in the app
+import { inject, EnvironmentInjector, createEnvironmentInjector, Injector } from '@angular/core';
+import { provideStates } from '@ngxs/store';
+
+@Injectable({ providedIn: 'root' })
+export class LogRocketService {
+  private injector = inject(EnvironmentInjector);
+
+  async start() {
+    // Load LogRocket script.
+    await loadScript('https://cdn.logr-in.com/LogRocket.min.js');
+
+    window.LogRocket.init('your-app-id');
+
+    // Lazy-load the NGXS plugin.
+    const { withNgxsLogRocketReduxMiddlewarePlugin } = await import('ngxs-logrocket-plugin');
+
+    // Register plugin in child injector so it's available globally.
+    // This adds the plugin to NGXS without requiring app-level configuration.
+    createEnvironmentInjector(
+      [
+        provideStates(
+          [],
+          withNgxsLogRocketReduxMiddlewarePlugin({
+            logrocket: () => window.LogRocket,
+          }),
+        ),
+      ],
+      this.injector,
+    );
+  }
+}
+
+// Helper function to load external scripts.
+function loadScript(src: string): Promise<void> {
+  return new Promise((resolve, reject) => {
+    const script = document.createElement('script');
+    script.src = src;
+    script.onload = () => resolve();
+    script.onerror = () => reject(new Error(`Failed to load script: ${src}`));
+    document.head.appendChild(script);
+  });
+}
+```
+
 ## Configuration
 
 ### Sanitizing Actions

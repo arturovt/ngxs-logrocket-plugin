@@ -9,6 +9,7 @@
   },
   "homepage": "https://github.com/arturovt/ngxs-logrocket-plugin#readme",
   "scripts": {
+    "prepare": "husky",
     "postinstall": "husky init",
     "build": "nx build ngxs-logrocket-plugin",
     "postbuild": "cp README.md dist/libs/ngxs-logrocket-plugin/README.md"
